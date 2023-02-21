@@ -2,8 +2,10 @@ package com.nowcoder.community.service;
 
 import com.nowcoder.community.dao.UserMapper;
 import com.nowcoder.community.entity.User;
+import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.MailClient;
+import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,7 @@ import java.util.Random;
  * @create 2023-02-14 22:19
  */
 @Service
-public class UserService {
+public class UserService implements CommunityConstant {
 
     @Autowired
     private UserMapper userMapper;
@@ -32,7 +34,7 @@ public class UserService {
     @Autowired
     TemplateEngine templateEngine;
 
-    @Value("${community.path.domin")
+    @Value("${community.path.domin}")
     private String domin;
 
     @Value(("${server.servlet.context-path}"))
@@ -88,11 +90,24 @@ public class UserService {
         //激活邮件
         Context context = new Context();
         context.setVariable("email", user.getEmail());
+        //http://localhost:8080/community/activation/101/code
         String url = domin + contextPath + "/activation/" + user.getId() + "/" + user.getActivationCode();
         context.setVariable("url",url);
         String content = templateEngine.process("/mail/activation",context);
         mailClient.sendMail(user.getEmail(),"激活账号",content);
 
         return map;
+    }
+
+    public int activation(int userId, String code) {
+        User user = userMapper.selectById(userId);
+        if (user.getStatus() == 1) {
+            return ACTIVATION_REPEAT;
+        } else if (user.getActivationCode().equals(code)) {
+            userMapper.updateStatus(userId, 1);
+            return ACTIVATION_SUCCESS;
+        } else {
+            return ACTIVATION_FAILURE;
+        }
     }
 }

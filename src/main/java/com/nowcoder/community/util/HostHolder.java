@@ -19,7 +19,7 @@ public class HostHolder {
         users.set(user);
     }
 
-    public User getuser() {
+    public User getUser() {
         return users.get();
     }
 

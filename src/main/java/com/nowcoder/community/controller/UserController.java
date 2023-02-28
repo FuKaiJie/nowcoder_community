@@ -1,5 +1,6 @@
 package com.nowcoder.community.controller;
 
+import com.nowcoder.community.annotation.LoginRequired;
 import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.UserService;
 import com.nowcoder.community.util.CommunityUtil;
@@ -48,11 +49,13 @@ public class UserController {
     @Autowired
     private HostHolder hostHolder;
 
+    @LoginRequired
     @RequestMapping(path = "/setting", method = RequestMethod.GET)
     public String getSettingPage() {
         return "/site/setting";
     }
 
+    @LoginRequired
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model) {
         if (headerImage == null) {
@@ -80,7 +83,7 @@ public class UserController {
 
         //更新当前用户的头像的路径（web访问路径）
         //http://localhost:8080/community/user/header/xxx.png
-        User user = hostHolder.getuser();
+        User user = hostHolder.getUser();
         String headerUrl = domin + contextPath + "/user/header/" + fileName;
         userService.updateHeader(user.getId(), headerUrl);
 
